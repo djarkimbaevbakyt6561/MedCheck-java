@@ -831,6 +831,8 @@ public class Main {
                                 }
                             } else {
                                 System.out.println("Больница с таким id не найден!");
+                                scanner.nextLine();
+
                             }
                         } catch (InputMismatchException e) {
                             System.out.println("Введите число!");
@@ -870,6 +872,8 @@ public class Main {
                                         Map<String, Hospital> hospitalMap = hospitalService.getAllHospitalByAddress(addresses);
                                         if (hospitalMap.isEmpty()) {
                                             System.out.println("Больниц не обнаружено");
+                                            scanner.nextLine();
+
                                         } else {
                                             for (Map.Entry<String, Hospital> entry : hospitalMap.entrySet()) {
                                                 String address = entry.getKey();
@@ -885,6 +889,8 @@ public class Main {
                                 }
                             } else {
                                 System.out.println("Больница с таким id не найден!");
+                                scanner.nextLine();
+
                             }
                         } catch (InputMismatchException e) {
                             System.out.println("Введите число!");
@@ -913,6 +919,7 @@ public class Main {
                             if (foundHospital != null) {
                                 if (foundHospital.getDepartments().isEmpty() || foundHospital.getDoctors().isEmpty()) {
                                     System.out.println("Отделений или докторов нет!");
+                                    scanner.nextLine();
                                 } else {
                                     System.out.println("Все отделения: ");
                                     for (Department department : foundHospital.getDepartments()) {
@@ -971,6 +978,8 @@ public class Main {
                                 }
                             } else {
                                 System.out.println("Больница с таким id не найден!");
+                                scanner.nextLine();
+
                             }
                         } catch (InputMismatchException e) {
                             System.out.println("Введите число!");
@@ -991,7 +1000,7 @@ public class Main {
                             System.out.print("Выберите больницу по id: ");
                             Long id = scanner.nextLong();
                             List<Doctor> doctors = doctorService.getAllDoctorsByHospitalId(id);
-                            if (doctors != null) {
+                            if (!doctors.isEmpty()) {
                                 System.out.println("Все доктора: ");
                                 for (Doctor doctor : doctors) {
                                     System.out.println(doctor);
@@ -1032,7 +1041,7 @@ public class Main {
                                 System.out.print("Введите id отделения: ");
                                 Long idDepartment = scanner.nextLong();
                                 List<Doctor> doctors = doctorService.getAllDoctorsByDepartmentId(idDepartment);
-                                if (doctors != null) {
+                                if (!doctors.isEmpty()) {
                                     System.out.println("Все доктора: ");
                                     for (Doctor doctor : doctors) {
                                         System.out.println(doctor);
@@ -1062,7 +1071,7 @@ public class Main {
                             System.out.print("Выберите больницу по id: ");
                             Long id = scanner.nextLong();
                             List<Department> departments = departmentService.getAllDepartmentByHospital(id);
-                            if (departments != null) {
+                            if (!departments.isEmpty()) {
                                 System.out.println("Все отделения: ");
                                 for (Department department : departments) {
                                     System.out.println(department);
