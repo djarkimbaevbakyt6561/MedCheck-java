@@ -1,7 +1,9 @@
 package models;
 
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class Hospital {
     private Long id;
@@ -17,10 +19,6 @@ public class Hospital {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getHospitalName() {
-        return hospitalName;
     }
 
     public void setHospitalName(String hospitalName) {
@@ -48,4 +46,27 @@ public class Hospital {
         return patients;
     }
 
+    public static Hospital createHospital() {
+        Hospital hospital = new Hospital();
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Введите название больницы: ");
+        hospital.setHospitalName(scanner.nextLine());
+        System.out.print("Введите адрес больницы: ");
+        hospital.setAddress(scanner.nextLine());
+        hospital.setId(System.currentTimeMillis());
+        if (hospital.address.isEmpty() || hospital.hospitalName.isEmpty()) {
+            System.out.println("Значение не должно быть пустым!");
+        } else {
+            return hospital;
+        }
+        return null;
+    }
+
+    @Override
+    public String toString() {
+        return "Hospital " +
+                "id = " + id +
+                ", hospitalName = " + hospitalName +
+                ", address = " + address;
+    }
 }
