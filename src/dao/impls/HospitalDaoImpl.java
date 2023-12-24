@@ -8,6 +8,8 @@ import models.Patient;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class HospitalDaoImpl implements HospitalDao {
     private final Database database;
@@ -24,12 +26,7 @@ public class HospitalDaoImpl implements HospitalDao {
 
     @Override
     public Hospital findHospitalById(Long id) {
-        for (Hospital hospital : database.getHospitals()) {
-            if(hospital.getId().equals(id)){
-                return hospital;
-            }
-        }
-        return null;
+       return database.getHospitals().stream().filter(x -> x.getId().equals(id)).findFirst().orElse(null);
     }
 
     @Override
@@ -39,35 +36,23 @@ public class HospitalDaoImpl implements HospitalDao {
 
     @Override
     public List<Patient> getAllPatientFromHospital(Long id) {
-        for (Hospital hospital : database.getHospitals()) {
-            if(hospital.getId().equals(id)){
-                return hospital.getPatients();
-            }
+        Hospital hospital = database.getHospitals().stream().filter(x -> x.getId().equals(id)).findFirst().orElse(null);
+        if(hospital !=null){
+            return hospital.getPatients();
         }
         return null;
     }
 
     @Override
     public String deleteHospitalById(Long id) {
-        for (Hospital hospital : database.getHospitals()) {
-            if(hospital.getId().equals(id)){
-                database.getHospitals().remove(hospital);
-                return "Больница успешно удалена!";
-            }
-        }
-        return null;
+        boolean removed = database.getHospitals().removeIf(hospital -> hospital.getId().equals(id));
+        return removed ? "Больница успешно удалена!" : null;
     }
 
     @Override
     public Map<String, Hospital> getAllHospitalByAddress(List<String> addresses) {
-        Map<String, Hospital> hospitalMap = new LinkedHashMap<>();
-        for (Hospital hospital : database.getHospitals()) {
-            for (String address : addresses) {
-                if(hospital.getAddress().equals(address)){
-                    hospitalMap.put(address, hospital);
-                }
-            }
-        }
-        return hospitalMap;
+        return database.getHospitals().stream()
+                .filter(hospital -> addresses.contains(hospital.getAddress()))
+                .collect(Collectors.toMap(Hospital::getAddress, Function.identity(), (existing, replacement) -> existing, LinkedHashMap::new));
     }
 }

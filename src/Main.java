@@ -20,19 +20,20 @@ import java.util.List;
 import java.util.Map;
 
 public class Main {
+    private static final Database database = new Database();
+    private static final DepartmentDaoImpl departmentDao = new DepartmentDaoImpl(database);
+    private static final HospitalDaoImpl hospitalDao = new HospitalDaoImpl(database);
+    private static final PatientDaoImpl patientDao = new PatientDaoImpl(database);
+    private static final DoctorDaoImpl doctorDao = new DoctorDaoImpl(database);
+
+    private static final DepartmentServiceImpl departmentService = new DepartmentServiceImpl(departmentDao);
+    private static final HospitalServiceImpl hospitalService = new HospitalServiceImpl(hospitalDao);
+    private static final PatientServiceImpl patientService = new PatientServiceImpl(patientDao);
+    private static final DoctorServiceImpl doctorService = new DoctorServiceImpl(doctorDao);
     private static final Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
-        Database database = new Database();
-        DepartmentDaoImpl departmentDao = new DepartmentDaoImpl(database);
-        HospitalDaoImpl hospitalDao = new HospitalDaoImpl(database);
-        PatientDaoImpl patientDao = new PatientDaoImpl(database);
-        DoctorDaoImpl doctorDao = new DoctorDaoImpl(database);
 
-        DepartmentServiceImpl departmentService = new DepartmentServiceImpl(departmentDao);
-        HospitalServiceImpl hospitalService = new HospitalServiceImpl(hospitalDao);
-        PatientServiceImpl patientService = new PatientServiceImpl(patientDao);
-        DoctorServiceImpl doctorService = new DoctorServiceImpl(doctorDao);
         boolean exit = false;
         while (!exit) {
             System.out.println("""
@@ -71,24 +72,13 @@ public class Main {
                     }
                 }
                 case "2" -> {
-                    if (hospitalService.getAllHospital().isEmpty()) {
-                        System.out.println("Больниц нету!");
-                    } else {
-                        System.out.println("Все больницы: ");
-                        for (Hospital hospital : hospitalService.getAllHospital()) {
-                            System.out.println(hospital);
-                        }
+                    String result = displayAllHospitals();
+                    if(result == null){
                         try {
                             System.out.print("Выберите больницу по id: ");
                             Long id = scanner.nextLong();
-                            boolean found = false;
-                            for (Hospital hospital : hospitalService.getAllHospital()) {
-                                if (hospital.getId().equals(id)) {
-                                    found = true;
-                                    break;
-                                }
-                            }
-                            if (found) {
+                            Hospital found = hospitalService.findHospitalById(id);
+                            if (found != null) {
                                 Patient newPatient = Patient.createPatient();
                                 System.out.println(patientService.add(id, newPatient));
                             } else {
@@ -101,24 +91,13 @@ public class Main {
                     }
                 }
                 case "3" -> {
-                    if (hospitalService.getAllHospital().isEmpty()) {
-                        System.out.println("Больниц нету!");
-                    } else {
-                        System.out.println("Все больницы: ");
-                        for (Hospital hospital : hospitalService.getAllHospital()) {
-                            System.out.println(hospital);
-                        }
+                    String result = displayAllHospitals();
+                    if(result == null){
                         try {
                             System.out.print("Выберите больницу по id: ");
                             Long id = scanner.nextLong();
-                            boolean found = false;
-                            for (Hospital hospital : hospitalService.getAllHospital()) {
-                                if (hospital.getId().equals(id)) {
-                                    found = true;
-                                    break;
-                                }
-                            }
-                            if (found) {
+                            Hospital found = hospitalService.findHospitalById(id);
+                            if (found != null) {
                                 while (true) {
                                     try {
                                         System.out.print("Сколько пациентов хотите добавить: ");
@@ -146,24 +125,13 @@ public class Main {
                     }
                 }
                 case "4" -> {
-                    if (hospitalService.getAllHospital().isEmpty()) {
-                        System.out.println("Больниц нету!");
-                    } else {
-                        System.out.println("Все больницы: ");
-                        for (Hospital hospital : hospitalService.getAllHospital()) {
-                            System.out.println(hospital);
-                        }
+                    String result = displayAllHospitals();
+                    if(result == null){
                         try {
                             System.out.print("Выберите больницу по id: ");
                             Long id = scanner.nextLong();
-                            boolean found = false;
-                            for (Hospital hospital : hospitalService.getAllHospital()) {
-                                if (hospital.getId().equals(id)) {
-                                    found = true;
-                                    break;
-                                }
-                            }
-                            if (found) {
+                            Hospital found = hospitalService.findHospitalById(id);
+                            if (found != null) {
                                 Doctor newDoctor = Doctor.createDoctor();
                                 System.out.println(doctorService.add(id, newDoctor));
                             } else {
@@ -176,24 +144,13 @@ public class Main {
                     }
                 }
                 case "5" -> {
-                    if (hospitalService.getAllHospital().isEmpty()) {
-                        System.out.println("Больниц нету!");
-                    } else {
-                        System.out.println("Все больницы: ");
-                        for (Hospital hospital : hospitalService.getAllHospital()) {
-                            System.out.println(hospital);
-                        }
+                    String result = displayAllHospitals();
+                    if(result == null){
                         try {
                             System.out.print("Выберите больницу по id: ");
                             Long id = scanner.nextLong();
-                            boolean found = false;
-                            for (Hospital hospital : hospitalService.getAllHospital()) {
-                                if (hospital.getId().equals(id)) {
-                                    found = true;
-                                    break;
-                                }
-                            }
-                            if (found) {
+                            Hospital found = hospitalService.findHospitalById(id);
+                            if (found != null) {
                                 Department newDepartment = Department.createDepartment(hospitalService.getAllHospital());
                                 System.out.println(departmentService.add(id, newDepartment));
                             } else {
@@ -206,23 +163,12 @@ public class Main {
                     }
                 }
                 case "6" -> {
-                    if (hospitalService.getAllHospital().isEmpty()) {
-                        System.out.println("Больниц нету!");
-                    } else {
-                        System.out.println("Все больницы: ");
-                        for (Hospital hospital : hospitalService.getAllHospital()) {
-                            System.out.println(hospital);
-                        }
+                    String resultHos = displayAllHospitals();
+                    if(resultHos == null){
                         try {
                             System.out.print("Выберите больницу по id: ");
                             Long id = scanner.nextLong();
-                            Hospital foundHospital = null;
-                            for (Hospital hospital : hospitalService.getAllHospital()) {
-                                if (hospital.getId().equals(id)) {
-                                    foundHospital = hospital;
-                                    break;
-                                }
-                            }
+                            Hospital foundHospital = hospitalService.findHospitalById(id);
                             if (foundHospital != null) {
                                 if (foundHospital.getPatients().isEmpty()) {
                                     System.out.println("Пациентов нет!");
@@ -257,23 +203,12 @@ public class Main {
                     }
                 }
                 case "7" -> {
-                    if (hospitalService.getAllHospital().isEmpty()) {
-                        System.out.println("Больниц нету!");
-                    } else {
-                        System.out.println("Все больницы: ");
-                        for (Hospital hospital : hospitalService.getAllHospital()) {
-                            System.out.println(hospital);
-                        }
+                    String resultHos = displayAllHospitals();
+                    if(resultHos == null){
                         try {
                             System.out.print("Выберите больницу по id: ");
                             Long id = scanner.nextLong();
-                            Hospital foundHospital = null;
-                            for (Hospital hospital : hospitalService.getAllHospital()) {
-                                if (hospital.getId().equals(id)) {
-                                    foundHospital = hospital;
-                                    break;
-                                }
-                            }
+                            Hospital foundHospital = hospitalService.findHospitalById(id);
                             if (foundHospital != null) {
                                 if (foundHospital.getPatients().isEmpty()) {
                                     System.out.println("Докторов нет!");
@@ -308,23 +243,12 @@ public class Main {
                     }
                 }
                 case "8" -> {
-                    if (hospitalService.getAllHospital().isEmpty()) {
-                        System.out.println("Больниц нету!");
-                    } else {
-                        System.out.println("Все больницы: ");
-                        for (Hospital hospital : hospitalService.getAllHospital()) {
-                            System.out.println(hospital);
-                        }
+                    String resultHos = displayAllHospitals();
+                    if(resultHos == null){
                         try {
                             System.out.print("Выберите больницу по id: ");
                             Long id = scanner.nextLong();
-                            Hospital foundHospital = null;
-                            for (Hospital hospital : hospitalService.getAllHospital()) {
-                                if (hospital.getId().equals(id)) {
-                                    foundHospital = hospital;
-                                    break;
-                                }
-                            }
+                            Hospital foundHospital = hospitalService.findHospitalById(id);
                             if (foundHospital != null) {
                                 if (foundHospital.getPatients().isEmpty()) {
                                     System.out.println("Отделений нет!");
@@ -359,23 +283,12 @@ public class Main {
                     }
                 }
                 case "9" -> {
-                    if (hospitalService.getAllHospital().isEmpty()) {
-                        System.out.println("Больниц нету!");
-                    } else {
-                        System.out.println("Все больницы: ");
-                        for (Hospital hospital : hospitalService.getAllHospital()) {
-                            System.out.println(hospital);
-                        }
+                    String result = displayAllHospitals();
+                    if(result == null){
                         try {
                             System.out.print("Выберите больницу по id: ");
                             Long id = scanner.nextLong();
-                            Hospital foundHospital = null;
-                            for (Hospital hospital : hospitalService.getAllHospital()) {
-                                if (hospital.getId().equals(id)) {
-                                    foundHospital = hospital;
-                                    break;
-                                }
-                            }
+                            Hospital foundHospital = hospitalService.findHospitalById(id);
                             if (foundHospital != null) {
                                 System.out.println(hospitalService.deleteHospitalById(foundHospital.getId()));
                             } else {
@@ -388,23 +301,12 @@ public class Main {
                     }
                 }
                 case "10" -> {
-                    if (hospitalService.getAllHospital().isEmpty()) {
-                        System.out.println("Больниц нету!");
-                    } else {
-                        System.out.println("Все больницы: ");
-                        for (Hospital hospital : hospitalService.getAllHospital()) {
-                            System.out.println(hospital);
-                        }
+                    String result = displayAllHospitals();
+                    if(result == null){
                         try {
                             System.out.print("Выберите больницу по id: ");
                             Long id = scanner.nextLong();
-                            Hospital foundHospital = null;
-                            for (Hospital hospital : hospitalService.getAllHospital()) {
-                                if (hospital.getId().equals(id)) {
-                                    foundHospital = hospital;
-                                    break;
-                                }
-                            }
+                            Hospital foundHospital = hospitalService.findHospitalById(id);
                             if (foundHospital != null) {
                                 if (foundHospital.getPatients().isEmpty()) {
                                     System.out.println("Пациентов нет!");
@@ -487,23 +389,12 @@ public class Main {
                     }
                 }
                 case "11" -> {
-                    if (hospitalService.getAllHospital().isEmpty()) {
-                        System.out.println("Больниц нету!");
-                    } else {
-                        System.out.println("Все больницы: ");
-                        for (Hospital hospital : hospitalService.getAllHospital()) {
-                            System.out.println(hospital);
-                        }
+                    String result = displayAllHospitals();
+                    if(result == null){
                         try {
                             System.out.print("Выберите больницу по id: ");
                             Long id = scanner.nextLong();
-                            Hospital foundHospital = null;
-                            for (Hospital hospital : hospitalService.getAllHospital()) {
-                                if (hospital.getId().equals(id)) {
-                                    foundHospital = hospital;
-                                    break;
-                                }
-                            }
+                            Hospital foundHospital = hospitalService.findHospitalById(id);
                             if (foundHospital != null) {
                                 if (foundHospital.getDoctors().isEmpty()) {
                                     System.out.println("Докторов нет!");
@@ -582,23 +473,12 @@ public class Main {
                     }
                 }
                 case "12" -> {
-                    if (hospitalService.getAllHospital().isEmpty()) {
-                        System.out.println("Больниц нету!");
-                    } else {
-                        System.out.println("Все больницы: ");
-                        for (Hospital hospital : hospitalService.getAllHospital()) {
-                            System.out.println(hospital);
-                        }
+                    String result = displayAllHospitals();
+                    if(result == null){
                         try {
                             System.out.print("Выберите больницу по id: ");
                             Long id = scanner.nextLong();
-                            Hospital foundHospital = null;
-                            for (Hospital hospital : hospitalService.getAllHospital()) {
-                                if (hospital.getId().equals(id)) {
-                                    foundHospital = hospital;
-                                    break;
-                                }
-                            }
+                            Hospital foundHospital = hospitalService.findHospitalById(id);
                             if (foundHospital != null) {
                                 if (foundHospital.getDepartments().isEmpty()) {
                                     System.out.println("Отделений нет!");
@@ -643,23 +523,12 @@ public class Main {
                     }
                 }
                 case "13" -> {
-                    if (hospitalService.getAllHospital().isEmpty()) {
-                        System.out.println("Больниц нету!");
-                    } else {
-                        System.out.println("Все больницы: ");
-                        for (Hospital hospital : hospitalService.getAllHospital()) {
-                            System.out.println(hospital);
-                        }
+                    String resultHospitals = displayAllHospitals();
+                    if(resultHospitals == null){
                         try {
                             System.out.print("Выберите больницу по id: ");
                             Long id = scanner.nextLong();
-                            Hospital foundHospital = null;
-                            for (Hospital hospital : hospitalService.getAllHospital()) {
-                                if (hospital.getId().equals(id)) {
-                                    foundHospital = hospital;
-                                    break;
-                                }
-                            }
+                            Hospital foundHospital = hospitalService.findHospitalById(id);
                             if (foundHospital != null) {
                                 if (foundHospital.getPatients().isEmpty()) {
                                     System.out.println("Пациентов нет!");
@@ -691,23 +560,12 @@ public class Main {
                     }
                 }
                 case "14" -> {
-                    if (hospitalService.getAllHospital().isEmpty()) {
-                        System.out.println("Больниц нету!");
-                    } else {
-                        System.out.println("Все больницы: ");
-                        for (Hospital hospital : hospitalService.getAllHospital()) {
-                            System.out.println(hospital);
-                        }
+                    String result = displayAllHospitals();
+                    if(result == null){
                         try {
                             System.out.print("Выберите больницу по id: ");
                             Long id = scanner.nextLong();
-                            Hospital foundHospital = null;
-                            for (Hospital hospital : hospitalService.getAllHospital()) {
-                                if (hospital.getId().equals(id)) {
-                                    foundHospital = hospital;
-                                    break;
-                                }
-                            }
+                            Hospital foundHospital = hospitalService.findHospitalById(id);
                             if (foundHospital != null) {
                                 if (foundHospital.getPatients().isEmpty()) {
                                     System.out.println("Пациентов нет!");
@@ -778,13 +636,7 @@ public class Main {
                         try {
                             System.out.print("Выберите больницу по id: ");
                             Long id = scanner.nextLong();
-                            Hospital foundHospital = null;
-                            for (Hospital hospital : hospitalService.getAllHospital()) {
-                                if (hospital.getId().equals(id)) {
-                                    foundHospital = hospital;
-                                    break;
-                                }
-                            }
+                            Hospital foundHospital = hospitalService.findHospitalById(id);
                             if (foundHospital != null) {
                                 System.out.println(foundHospital);
                             } else {
@@ -807,23 +659,12 @@ public class Main {
                     }
                 }
                 case "18" -> {
-                    if (hospitalService.getAllHospital().isEmpty()) {
-                        System.out.println("Больниц нету!");
-                    } else {
-                        System.out.println("Все больницы: ");
-                        for (Hospital hospital : hospitalService.getAllHospital()) {
-                            System.out.println(hospital);
-                        }
+                    String result = displayAllHospitals();
+                    if(result == null){
                         try {
                             System.out.print("Выберите больницу по id: ");
                             Long id = scanner.nextLong();
-                            Hospital foundHospital = null;
-                            for (Hospital hospital : hospitalService.getAllHospital()) {
-                                if (hospital.getId().equals(id)) {
-                                    foundHospital = hospital;
-                                    break;
-                                }
-                            }
+                            Hospital foundHospital = hospitalService.findHospitalById(id);
                             if (foundHospital != null) {
                                 System.out.println("Все пациенты: ");
                                 for (Patient patient : foundHospital.getPatients()) {
@@ -842,24 +683,13 @@ public class Main {
                     }
                 }
                 case "19" -> {
-                    if (hospitalService.getAllHospital().isEmpty()) {
-                        System.out.println("Больниц нету!");
-                    } else {
-                        System.out.println("Все больницы: ");
-                        for (Hospital hospital : hospitalService.getAllHospital()) {
-                            System.out.println(hospital);
-                        }
+                    String result = displayAllHospitals();
+                    if(result == null){
                         try {
                             System.out.print("Выберите больницу по id: ");
                             Long id = scanner.nextLong();
-                            boolean found = false;
-                            for (Hospital hospital : hospitalService.getAllHospital()) {
-                                if (hospital.getId().equals(id)) {
-                                    found = true;
-                                    break;
-                                }
-                            }
-                            if (found) {
+                            Hospital foundHospital = hospitalService.findHospitalById(id);
+                            if (foundHospital != null) {
                                 while (true) {
                                     try {
                                         System.out.print("Сколько больниц хотите найти по адресам: ");
@@ -899,23 +729,12 @@ public class Main {
                     }
                 }
                 case "20" -> {
-                    if (hospitalService.getAllHospital().isEmpty()) {
-                        System.out.println("Больниц нету!");
-                    } else {
-                        System.out.println("Все больницы: ");
-                        for (Hospital hospital : hospitalService.getAllHospital()) {
-                            System.out.println(hospital);
-                        }
+                    String result = displayAllHospitals();
+                    if(result == null){
                         try {
                             System.out.print("Выберите больницу по id: ");
                             Long id = scanner.nextLong();
-                            Hospital foundHospital = null;
-                            for (Hospital hospital : hospitalService.getAllHospital()) {
-                                if (hospital.getId().equals(id)) {
-                                    foundHospital = hospital;
-                                    break;
-                                }
-                            }
+                            Hospital foundHospital = hospitalService.findHospitalById(id);
                             if (foundHospital != null) {
                                 if (foundHospital.getDepartments().isEmpty() || foundHospital.getDoctors().isEmpty()) {
                                     System.out.println("Отделений или докторов нет!");
@@ -948,14 +767,8 @@ public class Main {
                                                     try {
                                                         System.out.print("Выберите доктора по id: ");
                                                         Long idDoctor = scanner.nextLong();
-                                                        boolean foundDoctor = false;
-                                                        for (Doctor doctor : foundHospital.getDoctors()) {
-                                                            if (doctor.getId().equals(idDoctor)) {
-                                                                foundDoctor = true;
-                                                                break;
-                                                            }
-                                                        }
-                                                        if (foundDoctor) {
+                                                        Doctor foundDoctor = foundHospital.getDoctors().stream().filter(x -> x.getId().equals(id)).findFirst().orElse(null);
+                                                        if (foundDoctor != null) {
                                                             doctorsId.add(idDoctor);
                                                         } else {
                                                             throw new InputMismatchException();
@@ -989,13 +802,8 @@ public class Main {
                     }
                 }
                 case "21" -> {
-                    if (hospitalService.getAllHospital().isEmpty()) {
-                        System.out.println("Больниц нету!");
-                    } else {
-                        System.out.println("Все больницы: ");
-                        for (Hospital hospital : hospitalService.getAllHospital()) {
-                            System.out.println(hospital);
-                        }
+                    String result = displayAllHospitals();
+                    if(result == null){
                         try {
                             System.out.print("Выберите больницу по id: ");
                             Long id = scanner.nextLong();
@@ -1016,23 +824,12 @@ public class Main {
                     }
                 }
                 case "22" -> {
-                    if (hospitalService.getAllHospital().isEmpty()) {
-                        System.out.println("Больниц нету!");
-                    } else {
-                        System.out.println("Все больницы: ");
-                        for (Hospital hospital : hospitalService.getAllHospital()) {
-                            System.out.println(hospital);
-                        }
+                    String result = displayAllHospitals();
+                    if(result == null){
                         try {
                             System.out.print("Выберите больницу по id: ");
                             Long id = scanner.nextLong();
-                            Hospital foundHospital = null;
-                            for (Hospital hospital : hospitalService.getAllHospital()) {
-                                if (hospital.getId().equals(id)) {
-                                    foundHospital = hospital;
-                                    break;
-                                }
-                            }
+                            Hospital foundHospital = hospitalService.findHospitalById(id);
                             if (foundHospital != null) {
                                 System.out.println("Все отделения: ");
                                 for (Department department : foundHospital.getDepartments()) {
@@ -1060,13 +857,8 @@ public class Main {
                     }
                 }
                 case "23" -> {
-                    if (hospitalService.getAllHospital().isEmpty()) {
-                        System.out.println("Больниц нету!");
-                    } else {
-                        System.out.println("Все больницы: ");
-                        for (Hospital hospital : hospitalService.getAllHospital()) {
-                            System.out.println(hospital);
-                        }
+                    String result = displayAllHospitals();
+                    if(result == null){
                         try {
                             System.out.print("Выберите больницу по id: ");
                             Long id = scanner.nextLong();
@@ -1136,7 +928,16 @@ public class Main {
         }
         return foundDoctor;
     }
-
+    private static String displayAllHospitals() {
+        if (hospitalService.getAllHospital().isEmpty()) {
+            System.out.println("Больниц нету");
+            return "Больниц нету!";
+        } else {
+            System.out.println("Все больницы: ");
+            hospitalService.getAllHospital().forEach(System.out::println);
+            return null;
+        }
+    }
     private static Department getDepartment(Hospital foundHospital, Long idDoctor) {
         Department foundDepartment = null;
         for (Department department : foundHospital.getDepartments()) {

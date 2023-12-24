@@ -7,8 +7,8 @@ import models.Department;
 import models.Doctor;
 import models.Hospital;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class DoctorDaoImpl implements DoctorDao, GeneralDao<Doctor> {
     private final Database database;
@@ -19,84 +19,84 @@ public class DoctorDaoImpl implements DoctorDao, GeneralDao<Doctor> {
 
     @Override
     public Doctor findDoctorById(Long id) {
-        for (Hospital hospital : database.getHospitals()) {
-            for (Doctor doctor : hospital.getDoctors()) {
-                if(doctor.getId().equals(id)){
-                    return doctor;
-                }
-            }
-        }
-        return null;
+        return database.getHospitals().stream()
+                .flatMap(hospital -> hospital.getDoctors().stream())
+                .filter(doctor -> doctor.getId().equals(id))
+                .findFirst()
+                .orElse(null);
     }
 
-    @Override
     public String assignDoctorToDepartment(Long departmentId, List<Long> doctorsId) {
-        for (Hospital hospital : database.getHospitals()) {
-            List<Doctor> foundedDoctors = new ArrayList<>();
-            for (Long id : doctorsId) {
-                for (Doctor doctor : hospital.getDoctors()) {
-                    if(doctor.getId().equals(id)){
-                        foundedDoctors.add(doctor);
-                    }
-                }
-            }
-            for (Department department : hospital.getDepartments()) {
-                if(department.getId().equals(departmentId)){
-                    if(foundedDoctors.isEmpty()){
-                        return "Докторов не обнаружено!";
-                    } else {
-                        for (Doctor foundedDoctor : foundedDoctors) {
-                            department.getDoctors().add(foundedDoctor);
-                        }
-                        return "Докторы успешно добавлены!";
-                    }
+        Optional<Hospital> hospitalWithDepartment = database.getHospitals().stream()
+                .filter(hospital -> hospital.getDepartments().stream()
+                        .anyMatch(department -> department.getId().equals(departmentId)))
+                .findFirst();
+
+        if (hospitalWithDepartment.isPresent()) {
+            Hospital hospital = hospitalWithDepartment.get();
+            Department department = hospital.getDepartments().stream()
+                    .filter(dep -> dep.getId().equals(departmentId))
+                    .findFirst()
+                    .orElse(null);
+
+            if (department != null) {
+                List<Doctor> foundDoctors = hospital.getDoctors().stream()
+                        .filter(doctor -> doctorsId.contains(doctor.getId()))
+                        .toList();
+
+                if (foundDoctors.isEmpty()) {
+                    return "Докторов не обнаружено!";
+                } else {
+                    department.getDoctors().addAll(foundDoctors);
+                    return "Докторы успешно добавлены!";
                 }
             }
         }
+
         return null;
     }
 
     @Override
     public List<Doctor> getAllDoctorsByHospitalId(Long id) {
-        for (Hospital hospital : database.getHospitals()) {
-            if(hospital.getId().equals(id)){
-                return hospital.getDoctors();
-            }
-        }
-        return null;
+        return database.getHospitals().stream()
+                .filter(hospital -> hospital.getId().equals(id))
+                .findFirst()
+                .map(Hospital::getDoctors)
+                .orElse(null);
     }
 
     @Override
     public List<Doctor> getAllDoctorsByDepartmentId(Long id) {
-        for (Hospital hospital : database.getHospitals()) {
-            for (Department department : hospital.getDepartments()) {
-                if(department.getId().equals(id)){
-                    return department.getDoctors();
-                }
-            }
-        }
-        return null;
+        return database.getHospitals().stream()
+                .flatMap(hospital -> hospital.getDepartments().stream())
+                .filter(department -> department.getId().equals(id))
+                .findFirst()
+                .map(Department::getDoctors)
+                .orElse(null);
     }
 
     @Override
     public String add(Long hospitalId, Doctor doctor) {
-        for (Hospital hospital : database.getHospitals()) {
-            if(hospital.getId().equals(hospitalId)){
-                hospital.getDoctors().add(doctor);
-                return "Доктор успешно добавлен!";
-            }
+        Hospital targetHospital = database.getHospitals().stream()
+                .filter(hospital -> hospital.getId().equals(hospitalId))
+                .findFirst()
+                .orElse(null);
+
+        if (targetHospital != null) {
+            targetHospital.getDoctors().add(doctor);
+            return "Доктор успешно добавлен!";
         }
+
         return null;
     }
 
     @Override
     public String removeById(Long id) {
         for (Hospital hospital : database.getHospitals()) {
-            for (Doctor doctor : hospital.getDoctors()) {
-                if(doctor.getId().equals(id)){
-                    hospital.getDoctors().remove(doctor);
-                    return "Доктор успешно удален!";
-                }
+            Doctor doctor = hospital.getDoctors().stream().filter(x -> x.getId().equals(id)).findFirst().orElse(null);
+            if (doctor != null) {
+                hospital.getDoctors().remove(doctor);
+                return "Доктор успешно удален!";
             }
         }
         return null;
@@ -105,11 +105,13 @@ public class DoctorDaoImpl implements DoctorDao, GeneralDao<Doctor> {
     @Override
     public String updateById(Long id, Doctor doctor) {
         for (Hospital hospital : database.getHospitals()) {
-            for (int i = 0; i < hospital.getDoctors().size(); i++) {
-                if(hospital.getDoctors().get(i).getId().equals(id)){
-                    hospital.getDoctors().set(i, doctor);
-                    return "Доктор успешно обновлен!";
-                }
+            Doctor doctor1 = hospital.getDoctors().stream().filter(x -> x.getId().equals(id)).findFirst().orElse(null);
+            if (doctor1 != null) {
+                doctor1.setFirstName(doctor.getFirstName());
+                doctor1.setLastName(doctor.getLastName());
+                doctor1.setExperienceYear(doctor.getExperienceYear());
+                doctor1.setGender(doctor.getGender());
+                return "Доктор успешно обновлен!";
             }
         }
         return null;

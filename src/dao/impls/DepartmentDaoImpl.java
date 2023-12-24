@@ -7,6 +7,7 @@ import models.Department;
 import models.Hospital;
 
 import java.util.List;
+import java.util.Optional;
 
 public class DepartmentDaoImpl implements DepartmentDao, GeneralDao<Department> {
     private final Database database;
@@ -17,58 +18,60 @@ public class DepartmentDaoImpl implements DepartmentDao, GeneralDao<Department> 
 
     @Override
     public List<Department> getAllDepartmentByHospital(Long id) {
-        for (Hospital hospital : database.getHospitals()) {
-            if (hospital.getId().equals(id)) {
-                return hospital.getDepartments();
-            }
+        Hospital hospital = database.getHospitals().stream().filter(x -> x.getId().equals(id)).findFirst().orElse(null);
+        if (hospital != null) {
+            return hospital.getDepartments();
         }
         return null;
     }
 
     @Override
     public Department findDepartmentByName(String name) {
-        for (Hospital hospital : database.getHospitals()) {
-            for (Department department : hospital.getDepartments()) {
-                if (department.getDepartmentName().equals(name)) {
-                    return department;
-                }
-            }
-        }
-        return null;
+        return database.getHospitals().stream()
+                .flatMap(hospital -> hospital.getDepartments().stream())
+                .filter(department -> department.getDepartmentName().equals(name))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override
     public String add(Long hospitalId, Department department) {
-        for (Hospital hospital : database.getHospitals()) {
-            if (hospital.getId().equals(hospitalId)) {
-                hospital.getDepartments().add(department);
-                return "Отделение успешно добавлено!";
-            }
+        Hospital targetHospital = database.getHospitals().stream()
+                .filter(hospital -> hospital.getId().equals(hospitalId))
+                .findFirst()
+                .orElse(null);
+
+        if (targetHospital != null) {
+            targetHospital.getDepartments().add(department);
+            return "Отделение успешно добавлено!";
         }
+
         return null;
     }
 
     @Override
     public String removeById(Long id) {
-        for (Hospital hospital : database.getHospitals()) {
-            for (Department department : hospital.getDepartments()) {
-                if (department.getId().equals(id)) {
-                    hospital.getDepartments().remove(department);
-                    return "Отделение успешно удалено!";
-                }
-            }
+        Optional<Hospital> hospitalToRemoveFrom = database.getHospitals().stream()
+                .filter(hospital -> hospital.getDepartments().stream()
+                        .anyMatch(department -> department.getId().equals(id)))
+                .findFirst();
+
+        if (hospitalToRemoveFrom.isPresent()) {
+            Hospital hospital = hospitalToRemoveFrom.get();
+            hospital.getDepartments().removeIf(department -> department.getId().equals(id));
+            return "Отделение успешно удалено!";
         }
+
         return null;
     }
 
     @Override
     public String updateById(Long id, Department department) {
         for (Hospital hospital : database.getHospitals()) {
-            for (int i = 0; i < hospital.getDepartments().size(); i++) {
-                if (hospital.getDepartments().get(i).getId().equals(id)) {
-                    hospital.getDepartments().set(i, department);
-                    return "Отделение успешно обновлено!";
-                }
+            Department department1 = hospital.getDepartments().stream().filter(x -> x.getId().equals(id)).findFirst().orElse(null);
+            if (department1 != null) {
+                department1.setDepartmentName(department.getDepartmentName());
+                return "Отделение успешно обновлено!";
             }
         }
         return null;
